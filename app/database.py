@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
 
 
 # Database configuration from environment variables (injected by docker-compose)
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "fitcore")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "fitcorepass")

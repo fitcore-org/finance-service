@@ -99,6 +99,14 @@ async def confirm_payment(
             "paid_at": payment_status.last_payment.isoformat()
         }
     )
+
+    await publish_message(
+        "employee-status-changed-queue",
+        {
+            "id": employee_id,
+            "active": True
+        }
+    )
     
     return payment_status
 
