@@ -32,11 +32,11 @@ async def lifespan(app: FastAPI):
                 print("✅ Payment cycle check completed - no reset needed")
             
             # Depois verificar se há funcionários para demo
-            demo_payments = await PaymentCycleService.initialize_demo_payments(db)
-            if demo_payments > 0:
-                print(f"🎯 Demo initialization: {demo_payments} employees marked as paid for demonstration")
-            else:
-                print("ℹ️  No employees available for demo payment initialization")
+            # demo_payments = await PaymentCycleService.initialize_demo_payments(db)
+            # if demo_payments > 0:
+            #    print(f"Demo initialization: {demo_payments} employees marked as paid for demonstration")
+            #else:
+            #    print("ℹNo employees available for demo payment initialization")
             
             # Inicializar dados demo da tabela expenses
             demo_expenses = await ExpenseService.seed_demo_expenses(db)

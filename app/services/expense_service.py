@@ -129,14 +129,16 @@ class ExpenseService:
                 "amount": 2500.00,
                 "expense_date": date(2025, 8, 1),
                 "expense_type": "equipment",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Equipamentos"
             },
             {
                 "description": "Manutenção Esteira Ergométrica",
                 "amount": 350.00,
                 "expense_date": date(2025, 8, 2),
                 "expense_type": "maintenance",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Manutenção"
             },
             # Gastos operacionais
             {
@@ -144,14 +146,16 @@ class ExpenseService:
                 "amount": 1200.50,
                 "expense_date": date(2025, 8, 3),
                 "expense_type": "utilities",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Contas"
             },
             {
                 "description": "Produtos de Limpeza e Higiene",
                 "amount": 180.00,
                 "expense_date": date(2025, 8, 3),
                 "expense_type": "cleaning",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Limpeza"
             },
             # Pagamentos de funcionários simulados
             {
@@ -181,14 +185,16 @@ class ExpenseService:
                 "amount": 1500.00,
                 "expense_date": date(2025, 8, 4),
                 "expense_type": "inventory",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Estoque"
             },
             {
                 "description": "Marketing Digital - Redes Sociais",
                 "amount": 800.00,
                 "expense_date": date(2025, 8, 5),
                 "expense_type": "marketing",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Marketing"
             },
             # Gastos diversos
             {
@@ -196,28 +202,62 @@ class ExpenseService:
                 "amount": 450.00,
                 "expense_date": date(2025, 8, 5),
                 "expense_type": "supplies",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Suprimentos"
             },
             {
                 "description": "Sistema de Som - Upgrade",
                 "amount": 1200.00,
                 "expense_date": date(2025, 8, 6),
                 "expense_type": "equipment",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Equipamentos"
             },
             {
                 "description": "Água Mineral - Estoque Mensal", 
                 "amount": 320.00,
                 "expense_date": date(2025, 8, 6),
                 "expense_type": "supplies",
-                "reference_id": None
+                "reference_id": None,
+                "category": "Suprimentos"
             }
         ]
         
         created_count = 0
         for expense_data in demo_expenses:
-            expense = Expense(**expense_data)
-            db.add(expense)
+            # Se não for pagamento de funcionário, criar entrada em manual_expenses primeiro
+            if expense_data["expense_type"] != "employee_payment":
+                # Criar gasto manual
+                manual_expense = ManualExpense(
+                    date=expense_data["expense_date"],
+                    category=expense_data["category"],
+                    description=expense_data["description"],
+                    value=expense_data["amount"],
+                    responsible="Sistema Demo"
+                )
+                db.add(manual_expense)
+                await db.flush()  # Para obter o ID
+                
+                # Criar entrada na tabela expenses com referência ao manual_expense
+                expense = Expense(
+                    description=f"Gasto Manual - {expense_data['category']}: {expense_data['description']}",
+                    amount=expense_data["amount"],
+                    expense_date=expense_data["expense_date"],
+                    expense_type="manual",
+                    reference_id=manual_expense.id
+                )
+                db.add(expense)
+            else:
+                # Para pagamentos de funcionários, criar diretamente na tabela expenses
+                expense = Expense(
+                    description=expense_data["description"],
+                    amount=expense_data["amount"],
+                    expense_date=expense_data["expense_date"],
+                    expense_type=expense_data["expense_type"],
+                    reference_id=expense_data["reference_id"]
+                )
+                db.add(expense)
+            
             created_count += 1
         
         await db.commit()
