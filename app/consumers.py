@@ -14,6 +14,11 @@ async def process_employee_registered(message: AbstractIncomingMessage):
     async with message.process():
         try:
             data = json.loads(message.body.decode())
+            
+            # Map employeeId to id if needed for schema compatibility
+            if 'employeeId' in data and 'id' not in data:
+                data['id'] = data['employeeId']
+            
             employee_data = EmployeeRegistered(**data)
             
             async with async_session_maker() as session:
@@ -48,6 +53,11 @@ async def process_employee_deleted(message: AbstractIncomingMessage):
     async with message.process():
         try:
             data = json.loads(message.body.decode())
+            
+            # Map employeeId to id if needed for schema compatibility
+            if 'employeeId' in data and 'id' not in data:
+                data['id'] = data['employeeId']
+            
             employee_data = EmployeeDeleted(**data)
             
             async with async_session_maker() as session:
@@ -69,6 +79,11 @@ async def process_employee_role_changed(message: AbstractIncomingMessage):
     async with message.process():
         try:
             data = json.loads(message.body.decode())
+            
+            # Map employeeId to id if needed for schema compatibility
+            if 'employeeId' in data and 'id' not in data:
+                data['id'] = data['employeeId']
+            
             employee_data = EmployeeRoleChanged(**data)
             
             async with async_session_maker() as session:
@@ -97,7 +112,7 @@ async def start_consumers():
     try:
         # Get queues - usando a fila específica do finance-service para consumir da exchange
         employee_registered_queue = await get_queue("fincance-cadastro-funcionario-queue")
-        employee_deleted_queue = await get_queue("employee-deleted-queue")
+        employee_deleted_queue = await get_queue("fincance-employee-deleted-queue")
         employee_role_changed_queue = await get_queue("employee-role-changed-queue")
         
         # Check if all queues were created successfully

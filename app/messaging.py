@@ -32,13 +32,14 @@ async def init_rabbitmq():
         
         # Declare queues for consuming
         await channel.declare_queue("fincance-cadastro-funcionario-queue", durable=True) # Nova queue
-        await channel.declare_queue("employee-deleted-queue", durable=True)
+        await channel.declare_queue("fincance-employee-deleted-queue", durable=True) # Nova queue
         await channel.declare_queue("employee-role-changed-queue", durable=True)
         
         # Declare queues for publishing (to ensure they exist)
         await channel.declare_queue("employee-paid-queue", durable=True)
         await channel.declare_queue("employee-dismissed-queue", durable=True)
-        await channel.declare_queue("employee-status-changed-queue", durable=True)
+        await channel.declare_queue("analytics-employee-status-changed-queue", durable=True)
+        await channel.declare_queue("user-employee-status-changed-queue", durable=True)
         await channel.declare_queue("finance.expense.registered", durable=True)
         await channel.declare_queue("finance.expense.deleted", durable=True)
         

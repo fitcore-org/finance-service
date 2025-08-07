@@ -101,7 +101,15 @@ async def confirm_payment(
     )
 
     await publish_message(
-        "employee-status-changed-queue",
+        "analytics-employee-status-changed-queue",
+        {
+            "id": employee_id,
+            "active": True
+        }
+    )
+
+    await publish_message(
+        "user-employee-status-changed-queue",
         {
             "id": employee_id,
             "active": True
@@ -131,13 +139,37 @@ async def dismiss_employee(
             detail="Employee not found"
         )
     
+    # Update payment status to mark as dismissed (reset payment status)
+    payment_status.paid = False
+    payment_status.updated_at = datetime.utcnow()
+    
+    await db.commit()
+    await db.refresh(payment_status)
+    
     # Publish employee status change event (deactivation)
-    # This will be consumed by our own consumer and will delete the employee data
     await publish_message(
-        "employee-status-changed-queue",
+        "analytics-employee-status-changed-queue",
         {
             "id": employee_id,
             "active": False
+        }
+    )
+
+    await publish_message(
+        "user-employee-status-changed-queue",
+        {
+            "id": employee_id,
+            "active": False
+        }
+    )
+    
+    # Also publish to employee-dismissed-queue for other services
+    await publish_message(
+        "employee-dismissed-queue",
+        {
+            "id": employee_id,
+            "dismissed_at": datetime.utcnow().isoformat(),
+            "position": payment_status.position_name
         }
     )
 
